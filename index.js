@@ -4,7 +4,7 @@ require('dotenv').config()
 const app = express()
 // const jwt = require('jsonwebtoken')
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const verify = require('jsonwebtoken/verify');
 // const { response } = require('express');
 
@@ -25,8 +25,11 @@ async function run() {
     try {
         await client.connect();
         const reviewsCollection = client.db('world-traveler').collection('reviews')
+        const tourListCollection = client.db('world-traveler').collection('tourList')
+        const bookingCollection = client.db('world-traveler').collection('booking')
 
 
+        // review
         app.get('/reviews', async (req, res) => {
             const query = {}
             const cursor = reviewsCollection.find(query)
@@ -34,11 +37,48 @@ async function run() {
             res.send(result)
         });
 
-        // review
+
         app.post('/reviews', async (req, res) => {
             const newReview = req.body
             console.log(newReview);
             const result = await reviewsCollection.insertOne(newReview)
+            res.send(result)
+        })
+
+        // tour package list
+
+        app.get('/tourList', async (req, res) => {
+            const query = {}
+            const cursor = tourListCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.get('/tourList/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const tourList = await tourListCollection.findOne(query);
+            console.log(id);
+            console.log(query);
+            res.send(tourList);
+        })
+
+
+        // booking area
+
+        app.get('/booking', async (req, res) => {
+            const email = req.query.email;
+            const authorization = req.headers.authorization
+            console.log(authorization);
+            const query = { email: email }
+            const bookings = await bookingCollection.find(query).toArray()
+            res.send(bookings)
+        })
+
+
+        app.post('/booking', async (req, res) => {
+            const bookings = req.body
+            const result = await bookingCollection.insertOne(bookings)
             res.send(result)
         })
     }
