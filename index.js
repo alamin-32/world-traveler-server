@@ -25,6 +25,7 @@ async function run() {
     try {
         await client.connect();
         const reviewsCollection = client.db('world-traveler').collection('reviews')
+        const destinationListCollection = client.db('world-traveler').collection('destinationList')
         const tourListCollection = client.db('world-traveler').collection('tourList')
         const bookingCollection = client.db('world-traveler').collection('booking')
 
@@ -45,6 +46,24 @@ async function run() {
             res.send(result)
         })
 
+
+        // destinationListCollection
+
+        app.get('/destinationList', async (req, res) => {
+            const query = {}
+            const cursor = destinationListCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.get('/destinationList/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const destinationList = await destinationListCollection.findOne(query);
+            res.send(destinationList);
+        })
+
+
         // tour package list
 
         app.get('/tourList', async (req, res) => {
@@ -58,8 +77,6 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const tourList = await tourListCollection.findOne(query);
-            console.log(id);
-            console.log(query);
             res.send(tourList);
         })
 
